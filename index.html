@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+
+<title>Emery Stone Batch Formulation</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f7fa;
+    padding:20px;
+    color:#111827;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+    color:#0f172a;
+}
+
+.section{
+    margin-bottom:25px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+input[type="number"]{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.slider-value{
+    margin-top:8px;
+    font-weight:bold;
+    color:#2563eb;
+}
+
+input[type="range"]{
+    width:100%;
+}
+
+.results{
+    margin-top:25px;
+}
+
+.result-box{
+    background:#eef5ff;
+    padding:16px;
+    border-radius:10px;
+    margin-bottom:12px;
+}
+
+.result-title{
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.recipe{
+    background:#f8fafc;
+    border-left:5px solid #2563eb;
+    padding:18px;
+    border-radius:10px;
+}
+
+.recipe h2{
+    margin-bottom:12px;
+}
+
+.recipe-item{
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+.warning{
+    margin-top:10px;
+    padding:14px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.red{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.yellow{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.orange{
+    background:#ffedd5;
+    color:#9a3412;
+}
+
+footer{
+    text-align:center;
+    margin-top:20px;
+    color:#6b7280;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>Emery Stone Batch Formulation</h1>
+
+<div class="section">
+<label>Emery Grains (kg)</label>
+<input type="number" id="emery" value="80" min="1">
+</div>
+
+<div class="section">
+<label>Mixing Room Temperature (°C)</label>
+<input type="range" id="temp" min="10" max="50" value="42">
+<div class="slider-value" id="tempValue">42°C</div>
+</div>
+
+<div class="section">
+<label>Relative Humidity (%)</label>
+<input type="range" id="humidity" min="10" max="100" value="65">
+<div class="slider-value" id="humidityValue">65%</div>
+</div>
+
+<div class="results">
+
+<div class="recipe">
+<h2>Factory Floor Recipe</h2>
+
+<div class="recipe-item">
+<strong>Grecian Magnesite (MgO):</strong>
+<span id="mgo"></span> kg
+</div>
+
+<div class="recipe-item">
+<strong>Salt Solution:</strong>
+<span id="salt"></span> Liters
+</div>
+</div>
+
+<br>
+
+<div class="result-box">
+<div class="result-title">Suggested Degrees Baume</div>
+<div id="baume"></div>
+</div>
+
+<div class="result-box">
+<div class="result-title">Target Salt Solution Temperature Before Mixing</div>
+<div id="saltTemp"></div>
+</div>
+
+<div class="result-box">
+<div class="result-title">Citric Acid Dose</div>
+<div id="citric"></div>
+</div>
+
+<div id="warnings"></div>
+
+</div>
+
+</div>
+
+<footer>
+Emery Stone Batch Formulation Calculator
+</footer>
+
+</div>
+
+<script>
+
+const emeryInput = document.getElementById("emery");
+const tempInput = document.getElementById("temp");
+const humidityInput = document.getElementById("humidity");
+
+function calculate() {
+
+let emery = parseFloat(emeryInput.value) || 0;
+let temp = parseFloat(tempInput.value);
+let humidity = parseFloat(humidityInput.value);
+
+document.getElementById("tempValue").innerText = temp + "°C";
+document.getElementById("humidityValue").innerText = humidity + "%";
+
+let mgo = emery * 0.275;
+
+let baseSalt = emery * 0.2;
+let adjustedSalt = baseSalt;
+
+if(humidity > 70){
+    adjustedSalt = baseSalt * 0.95;
+}
+else if(humidity < 30){
+    adjustedSalt = baseSalt * 1.05;
+}
+
+document.getElementById("mgo").innerText = mgo.toFixed(2);
+document.getElementById("salt").innerText = adjustedSalt.toFixed(2);
+
+let baume = "";
+let saltTemp = "";
+let citric = "";
+
+let mgoGrams = mgo * 1000;
+
+if(temp < 25){
+
+    baume = "32 Degrees Baume";
+    saltTemp = "20°C to 25°C";
+
+    let max = mgoGrams * 0.0005;
+    citric = `0 to ${max.toFixed(2)} g`;
+
+}
+else if(temp <= 35){
+
+    baume = "30 Degrees Baume";
+    saltTemp = "15°C to 20°C";
+
+    let min = mgoGrams * 0.001;
+    let max = mgoGrams * 0.002;
+
+    citric = `${min.toFixed(2)} g to ${max.toFixed(2)} g`;
+
+}
+else if(temp <= 40){
+
+    baume = "28 Degrees Baume";
+    saltTemp = "10°C to 15°C";
+
+    let min = mgoGrams * 0.002;
+    let max = mgoGrams * 0.003;
+
+    citric = `${min.toFixed(2)} g to ${max.toFixed(2)} g`;
+
+}
+else{
+
+    baume = "26 to 27 Degrees Baume";
+    saltTemp = "5°C to 10°C";
+
+    let dose = mgoGrams * 0.003;
+
+    citric = `${dose.toFixed(2)} g`;
+
+}
+
+document.getElementById("baume").innerText = baume;
+document.getElementById("saltTemp").innerText = saltTemp;
+document.getElementById("citric").innerText = citric;
+
+let warnings = "";
+
+if(temp > 40){
+warnings += `
+<div class="warning red">
+CRITICAL HEAT: Use ice-chilled water and mix smaller batches to stop fast setting.
+</div>`;
+}
+
+if(humidity > 70){
+warnings += `
+<div class="warning yellow">
+HIGH HUMIDITY: Salt volume reduced by 5%. Keep MgO bags tightly sealed.
+</div>`;
+}
+
+if(humidity < 30){
+warnings += `
+<div class="warning orange">
+LOW HUMIDITY: Salt volume increased by 5% to stop dry-out.
+</div>`;
+}
+
+document.getElementById("warnings").innerHTML = warnings;
+}
+
+emeryInput.addEventListener("input", calculate);
+tempInput.addEventListener("input", calculate);
+humidityInput.addEventListener("input", calculate);
+
+calculate();
+
+if("serviceWorker" in navigator){
+window.addEventListener("load", ()=>{
+navigator.serviceWorker.register("sw.js");
+});
+}
+
+</script>
+
+</body>
+</html>
